@@ -1,13 +1,28 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
 
+const rawBaseQuery = fetchBaseQuery({
+	baseUrl: 'https://api.favorit-parts.ru',
+});
+
+const baseQueryWithApiError = async (args, api, extraOptions) => {
+	const result = await rawBaseQuery(args, api, extraOptions);
+
+	if (result.data?.error) {
+		return {
+			error: {
+				status: 'API_ERROR',
+				data: result.data.error,
+			},
+		};
+	}
+
+	return result;
+};
+
 export const hspriceApi = createApi({
-	// Уникальное имя для редьюсера в сторе
 	reducerPath: 'hspriceApi',
-	// Базовый URL вашего бэкенда
-	baseQuery: fetchBaseQuery({ baseUrl: 'https://api.favorit-parts.ru' }),
-	// Описываем эндпоинты (запросы)
+	baseQuery: baseQueryWithApiError,
 	endpoints: (builder) => ({
-		// GET-запрос для получения списка постов
 		getHsprice: builder.query({
 			query: (params) => ({
 				url: '/hs/hsprice/',

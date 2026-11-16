@@ -1,11 +1,8 @@
-import React, { Fragment, useState } from 'react';
-import { Container, Dropdown, Form, Table } from 'react-bootstrap';
-import { useSelector } from 'react-redux';
-import 'bootstrap/dist/css/bootstrap.min.css';
+import { Table } from 'react-bootstrap';
 
 export function DataTable({ item }) {
 	return (
-		<div className="border overflow-auto mb-4">
+		<div className="border rounded overflow-hidden mb-4">
 			<Table responsive className="mb-0 align-middle">
 				<thead>
 					<tr className={item.count > 0 ? 'table-primary' : 'table-secondary'}>
@@ -14,9 +11,7 @@ export function DataTable({ item }) {
 							colSpan={3}
 							className={item.count > 0 ? '' : 'text-secondary'}
 						>
-							{item.name}
-							{` `}
-							<span className="text-secondary">/ {item.brand}</span>
+							{item.name} <span className="text-secondary">/ {item.brand}</span>
 						</th>
 					</tr>
 					{item.count > 0 && (
@@ -45,8 +40,12 @@ export function DataTable({ item }) {
 					{item.warehouses?.length > 0 ? (
 						item.warehouses.map((warehouse) => (
 							<tr key={warehouse.id}>
-								<td className="text-nowrap">{warehouse.code}</td>
-								<td className="text-nowrap">{warehouse.price}</td>
+								<td className="text-nowrap">{warehouse.code || '—'}</td>
+								<td className="text-nowrap">
+									{typeof warehouse.price === 'number'
+										? warehouse.price.toLocaleString('ru-RU')
+										: warehouse.price}
+								</td>
 								<td className="text-nowrap text-center">{warehouse.stock}</td>
 							</tr>
 						))

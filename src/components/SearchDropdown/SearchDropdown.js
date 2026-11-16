@@ -1,17 +1,17 @@
 import { useEffect, useRef, useState } from 'react';
-import { Button, Dropdown, Form, InputGroup } from 'react-bootstrap';
+import { Button, Dropdown, Form, InputGroup, Spinner } from 'react-bootstrap';
 import { useDispatch, useSelector } from 'react-redux';
+import { SearchIcon } from '../../consts';
 import { useDebounce } from '../../hooks/useDebounce';
 import {
 	setSelectedBrand,
 	setSelectedNumber,
-} from './../../store/slices/hspriceSlice';
-import '../../App.css';
-import { SearchIcon } from '../../consts';
+} from '../../store/slices/hspriceSlice';
 
 export default function SearchDropdown({
 	brandsList,
 	isLoading,
+	isFetching,
 	isError,
 	error,
 }) {
@@ -32,15 +32,21 @@ export default function SearchDropdown({
 
 	const handleClear = () => {
 		setQuery('');
-		inputRef.current?.focus();
+		dispatch(setSelectedNumber(''));
 		dispatch(setSelectedBrand(''));
+		inputRef.current?.focus();
 	};
 
 	const debouncedVal = useDebounce(query, 500);
 
 	useEffect(() => {
-		dispatch(setSelectedNumber(debouncedVal));
+		dispatch(setSelectedNumber(debouncedVal.trim()));
 	}, [debouncedVal]);
+
+	const errorMessage =
+		typeof error === 'string'
+			? error
+			: error?.data || error?.error || 'Ошибка получения данных';
 
 	return (
 		<div className="border rounded-3 p-4 bg-body-tertiary">
@@ -56,10 +62,11 @@ export default function SearchDropdown({
 						placeholder="Введите артикул автозапчасти..."
 						value={query}
 						onFocus={() => setIsOpen(true)}
-						// Небольшая задержка при потере фокуса, чтобы успел сработать клик по пункту меню
 						onBlur={() => setTimeout(() => setIsOpen(false), 150)}
 						onChange={(e) => {
-							dispatch(setSelectedBrand(''));
+							if (brand) {
+								dispatch(setSelectedBrand(''));
+							}
 							setQuery(e.target.value);
 							setIsOpen(true);
 						}}
@@ -67,6 +74,7 @@ export default function SearchDropdown({
 					{query && (
 						<Button
 							variant="link"
+							onMouseDown={(e) => e.preventDefault()}
 							onClick={handleClear}
 							aria-label="Очистить"
 							className="text-secondary text-decoration-none shadow-none px-3 bg-body border border-start-0"
@@ -76,22 +84,25 @@ export default function SearchDropdown({
 					)}
 				</InputGroup>
 
-				{isOpen && (
+				{isOpen && query.trim() && (
 					<Dropdown.Menu show className="w-100 mt-1 shadow-sm">
 						{isError ? (
 							<Dropdown.Item disabled className="text-danger text-center">
-								{error || 'Ошибка получения данных'}
+								{errorMessage}
 							</Dropdown.Item>
-						) : isLoading ? (
+						) : isLoading || isFetching ? (
 							<Dropdown.Item disabled className="text-center">
-								<div class="spinner-border spinner-border-sm" role="status">
-									<span class="visually-hidden">Loading...</span>
-								</div>
+								<Spinner animation="border" size="sm" role="status">
+									<span className="visually-hidden">Загрузка...</span>
+								</Spinner>
 							</Dropdown.Item>
 						) : brandsList.length > 0 ? (
 							brandsList.map((item) => (
-								// Используем item в качестве ключа т.к. значения строк в массиве уникальны
-								<Dropdown.Item key={item} onClick={() => handleSelect(item)}>
+								<Dropdown.Item
+									key={item}
+									onMouseDown={(e) => e.preventDefault()}
+									onClick={() => handleSelect(item)}
+								>
 									{item}
 								</Dropdown.Item>
 							))
@@ -105,17 +116,13 @@ export default function SearchDropdown({
 			{brand && (
 				<div className="d-inline-flex align-items-center gap-2 mt-3">
 					<span className="text-body">
-						<span className="text-secondary">Выбранный бренд:</span>
-						{` `}
-						{brand}
+						<span className="text-secondary">Выбранный бренд:</span> {brand}
 					</span>
 
 					<Button
 						variant="light"
 						size="sm"
-						onClick={() => {
-							dispatch(setSelectedBrand(''));
-						}}
+						onClick={() => dispatch(setSelectedBrand(''))}
 						aria-label="Очистить бренд"
 						className="d-inline-flex align-items-center justify-content-center border rounded-circle p-0 text-secondary btn-close-badge"
 					>

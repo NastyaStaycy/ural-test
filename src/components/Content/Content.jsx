@@ -1,15 +1,20 @@
 import { Fragment } from 'react';
 import { useSelector } from 'react-redux';
 import 'bootstrap/dist/css/bootstrap.min.css';
-import { Analogues } from './components/Analogues';
-import { DataTable } from './components/DataTable';
-import '../../App.css';
+import { Analogues } from './components/Analogues/Analogues';
+import { DataTable } from './components/DataTable/DataTable';
 
-export default function Content({ data, isLoading, isError, error }) {
+export default function Content({
+	data,
+	isLoading,
+	isError,
+	error,
+	isFetching,
+}) {
 	const brand = useSelector((state) => state.hsprice.selectedBrand);
 	const number = useSelector((state) => state.hsprice.selectedNumber);
 
-	if (isLoading && data.length === 0) {
+	if ((isLoading || isFetching) && !brand && data.length === 0) {
 		return (
 			<div className="text-center">
 				<div className="spinner-border spinner-border-sm" role="status">
@@ -20,9 +25,14 @@ export default function Content({ data, isLoading, isError, error }) {
 	}
 
 	if (isError) {
+		const errorMessage =
+			typeof error === 'string'
+				? error
+				: error?.data || error?.error || 'Ошибка получения данных';
+
 		return (
 			<div className="alert alert-danger text-center" role="alert">
-				{error || 'Ошибка получения данных'}
+				{errorMessage}
 			</div>
 		);
 	}
@@ -37,12 +47,21 @@ export default function Content({ data, isLoading, isError, error }) {
 		);
 	}
 
+	if (brand && data.length === 0) {
+		return (
+			<div className="alert alert-secondary text-center" role="alert">
+				По артикулу <strong>{number}</strong> и бренду <strong>{brand}</strong>{' '}
+				предложений не найдено
+			</div>
+		);
+	}
+
 	return (
-		<div>
+		<div className={isFetching ? 'opacity-50' : ''}>
 			{brand && <h4 className="mb-3">Автозапчасти бренда {brand}</h4>}
 
 			{data.map((item) => (
-				<Fragment key={item.goodsID}>
+				<Fragment key={`${item.goodsID}-${item.brand}-${item.number}`}>
 					<DataTable item={item} />
 
 					{!!item.analogues?.length && <Analogues items={item.analogues} />}
