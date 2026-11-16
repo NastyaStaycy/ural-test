@@ -1,70 +1,59 @@
-# Getting Started with Create React App
+# Поиск автозапчастей и аналогов (Favorit Parts API)
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+Клиентское веб-приложение на React для двухэтапного подбора автозапчастей и их аналогов по артикулу с интеграцией внешнего API-сервиса «Проценка» (Favorit Parts).
 
-## Available Scripts
+## Функциональность
 
-In the project directory, you can run:
+1. **Этап 1: Поиск производителей по артикулу**
+   - Ввод артикула детали в поисковую строку с оптимизацией запросов (`debounce`) и возможностью быстрой очистки поля.
+   - Запрос к API без указания бренда для получения списка всех производителей, выпускающих деталь с введённым номером.
+   - Отображение выпадающего списка найденных брендов для выбора пользователем.
 
-### `npm start`
+2. **Этап 2: Получение предложений и аналогов**
+   - Повторный запрос к API с передачей выбранного производителя и параметра `analogues=on` после клика на бренд.
+   - Вывод таблицы предложений по искомой детали и её аналогам с разбивкой по складам:
+     - Производитель и наименование детали
+     - Склад, актуальная стоимость (берётся из данных конкретного склада) и доступный остаток
+     - Общий остаток по всем складам
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+3. **Обработка состояний и ошибок**
+   - Индикация первичной загрузки (`isLoading`).
+   - Обработка пустых результатов поиска.
+   - Обработка сетевых сбоев и бизнес-ошибок API (`Empty key!`, `Invalid key client!`, `Request quota exceeded!`).
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+## Технологический стек
 
-### `npm test`
+- **React** (Create React App, JavaScript)
+- **Redux Toolkit & RTK Query** — управление состоянием, кэширование запросов и автоматический перезапуск при изменении параметров
+- **React-Bootstrap / Bootstrap 5.3** — адаптивная вёрстка и UI-компоненты
+- **Biome** — линтинг и форматирование кода
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+## Установка и запуск
 
-### `npm run build`
+1. **Клонируйте репозиторий:**
+   ```bash
+   git clone https://github.com
+   cd ural-test
+   ```
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+2. **Установите зависимости:**
+   ```bash
+   npm install
+   ```
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+3. **API-ключ для запросов:**
+   В качестве ключа покупателя в проекте для примера используется константа `USER_KEY = '00000000-0000-0000-0000-000000000001'`, которая находится в файле `src/consts.js`. При необходимости вы можете заменить её на свой рабочий ключ прямо в этом файле.
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+   *(Примечание: так как внешний API работает по протоколу `http://favorit-parts.ru`, запускайте приложение локально по `http://localhost:3000`, чтобы избежать блокировки Mixed Content в браузере).*
 
-### `npm run eject`
+4. **Запустите проект в режиме разработки:**
+   ```bash
+   npm start
+   ```
+   Приложение откроется в браузере по адресу [http://localhost:3000](http://localhost:3000).
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+## Доступные скрипты
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
-
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
-
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
-
-## Learn More
-
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
-
-### Code Splitting
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
-
-### Analyzing the Bundle Size
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
-
-### Making a Progressive Web App
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+- `npm start` — запуск приложения в режиме разработки
+- `npm run build` — сборка production-версии проекта в папку `build`
+- `npm test` — запуск тестов
